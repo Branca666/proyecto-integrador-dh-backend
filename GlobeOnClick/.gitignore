@@ -34,6 +34,6 @@ build/
 
 ### Desarrollo ###
 .env
-application.properties
+#application.properties
 application-dev.properties
 application-local.properties

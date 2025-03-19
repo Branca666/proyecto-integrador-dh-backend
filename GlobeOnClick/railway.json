@@ -1,5 +1,6 @@
 {
   "database": {
-    "image": "mysql:8.0"
+    "image": "mysql:8.0",
+    "command": "docker-entrypoint.sh mysqld"
   }
 }

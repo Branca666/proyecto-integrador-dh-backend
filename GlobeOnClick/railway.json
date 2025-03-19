@@ -1,0 +1,6 @@
+{
+  "database": {
+    "image": "mysql:8.0",
+    "command": "docker-entrypoint.sh mysqld --innodb-use-native-aio=0 --disable-log-bin --performance_schema=0"
+  }
+}

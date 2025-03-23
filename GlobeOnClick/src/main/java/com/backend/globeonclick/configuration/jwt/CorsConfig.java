@@ -17,6 +17,7 @@ public class CorsConfig {
 
         // Permite el origen de tu frontend
         config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("https://pi-dh-infradeploy-backend-production.up.railway.app");
 
         // Permite los métodos HTTP que necesitas
         config.addAllowedMethod("*");

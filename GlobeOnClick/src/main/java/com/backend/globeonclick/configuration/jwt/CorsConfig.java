@@ -1,4 +1,4 @@
-package com.backend.globeonclick.configuration;
+package com.backend.globeonclick.configuration.jwt;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

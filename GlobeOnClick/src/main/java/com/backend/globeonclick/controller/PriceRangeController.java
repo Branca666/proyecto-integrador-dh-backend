@@ -25,7 +25,10 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/price-ranges")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
+@CrossOrigin(origins = {
+        "http://localhost:5173/",
+        "https://pi-dh-infradeploytest-production.up.railway.app/"
+}, allowCredentials = "true")
 @RequiredArgsConstructor
 public class PriceRangeController {
 

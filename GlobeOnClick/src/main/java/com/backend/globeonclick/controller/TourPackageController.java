@@ -20,7 +20,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tourPackages")
+@RequestMapping("/api/v1/tourPackages") // ← Asegurar prefijo /api/v1
+@CrossOrigin(origins = {
+        "http://localhost:5173",
+        "https://pi-dh-infradeploytest-production.up.railway.app"
+})
 @RequiredArgsConstructor
 @Tag(name = "Package Controller", description = "Endpoints para gestión de paquetes turísticos")
 public class TourPackageController {

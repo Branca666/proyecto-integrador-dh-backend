@@ -41,6 +41,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/price-ranges/**").permitAll() // Permite acceso a rutas de price-ranges
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN") // Restringe acceso a rutas de administrador
                         .requestMatchers("/api/v1/tourPackages/**").permitAll()
+                        .requestMatchers("/api/tourPackages/**").permitAll()
                         .anyRequest().permitAll() // Todas las demás rutas requieren autenticación
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Configura sesiones sin estado

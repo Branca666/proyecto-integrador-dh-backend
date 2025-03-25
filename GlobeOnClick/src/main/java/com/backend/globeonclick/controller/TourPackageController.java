@@ -20,7 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/tourPackages")
+@RequestMapping("/api/tourPackages")
 @RequiredArgsConstructor
 @Tag(name = "Package Controller", description = "Endpoints para gestión de paquetes turísticos")
 public class TourPackageController {

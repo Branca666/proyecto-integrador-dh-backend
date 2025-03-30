@@ -24,4 +24,6 @@ public interface IReservationService {
     //ReservationResponseDTO updatePaymentStatus(Long id, String status);
 
     ReservationResponseDTO updateRating(Long id, String rating);
+
+    ReservationResponseDTO confirmReservationByEmail(Long id, String token);
 }

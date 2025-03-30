@@ -77,4 +77,17 @@ public class ReservationController {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
+
+    @Operation(summary = "Confirmar reservación por correo")
+    @GetMapping("/confirm-email/{id}/{token}")
+    public ResponseEntity<String> confirmReservationEmail(
+            @PathVariable Long id,
+            @PathVariable String token) {
+        try {
+            reservationService.confirmReservationByEmail(id, token);
+            return ResponseEntity.ok().body("<script>window.location.href = 'http://localhost:5173/confirmation-success';</script>");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("<script>window.location.href = 'http://localhost:5173/confirmation-error';</script>");
+        }
+    }
 }

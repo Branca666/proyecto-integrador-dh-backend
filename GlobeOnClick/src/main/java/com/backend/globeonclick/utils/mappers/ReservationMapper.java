@@ -2,6 +2,7 @@ package com.backend.globeonclick.utils.mappers;
 
 import com.backend.globeonclick.dto.request.ReservationRequestDTO;
 import com.backend.globeonclick.dto.response.ReservationResponseDTO;
+import com.backend.globeonclick.dto.response.TourPackageResponseDTO;
 import com.backend.globeonclick.entity.Reservation;
 import org.springframework.stereotype.Component;
 
@@ -9,11 +10,16 @@ import org.springframework.stereotype.Component;
 public class ReservationMapper {
     public ReservationResponseDTO toResponseDTO(Reservation reservation) {
         if (reservation == null) return null;
+        
+        System.out.println("Mapping reservation: " + reservation.getReservationId());
+        System.out.println("Tour package dates: " + 
+            "Start: " + (reservation.getTourPackage() != null ? reservation.getTourPackage().getStart_date() : "null") + 
+            ", End: " + (reservation.getTourPackage() != null ? reservation.getTourPackage().getEnd_date() : "null"));
 
         return ReservationResponseDTO.builder()
                 .reservationId(reservation.getReservationId())
                 .userId(reservation.getUser().getUserId())
-                .userName(reservation.getUser().getName())
+                .userName(reservation.getUser().getName() + " " + reservation.getUser().getPaternalSurname())
                 .packageId(reservation.getTourPackage().getPackageId())
                 .packageTitle(reservation.getTourPackage().getTitle())
                 .numberOfAdults(reservation.getNumberOfAdults())
@@ -24,6 +30,8 @@ public class ReservationMapper {
                 .rating(reservation.getRating())
                 .createdAt(reservation.getCreatedAt())
                 .updatedAt(reservation.getUpdatedAt())
+                .startDate(reservation.getTourPackage().getStart_date())
+                .endDate(reservation.getTourPackage().getEnd_date())
                 .build();
     }
 

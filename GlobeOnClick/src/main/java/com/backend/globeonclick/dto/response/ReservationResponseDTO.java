@@ -2,6 +2,7 @@ package com.backend.globeonclick.dto.response;
 
 import lombok.*;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -21,4 +22,6 @@ public class ReservationResponseDTO {
     private String rating;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDate startDate;
+    private LocalDate endDate;
 }

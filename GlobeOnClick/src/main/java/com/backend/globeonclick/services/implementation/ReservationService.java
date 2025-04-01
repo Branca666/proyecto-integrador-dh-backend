@@ -25,6 +25,7 @@ public class ReservationService implements IReservationService {
     private final IReservationRepository reservationRepository;
     private final ITourPackageRepository tourPackageRepository;
     private final IUserRepository userRepository;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -34,6 +35,11 @@ public class ReservationService implements IReservationService {
         
         TourPackage tourPackage = tourPackageRepository.findById(requestDTO.getPackageId())
                 .orElseThrow(() -> new ResourceNotFoundException("Paquete turístico no encontrado"));
+
+        // Verificar que el paquete tiene fechas válidas
+        if (tourPackage.getStart_date() == null || tourPackage.getEnd_date() == null) {
+            throw new IllegalStateException("El paquete turístico no tiene fechas válidas");
+        }
 
         // Calcular monto total
         double basePrice = tourPackage.getPrice();
@@ -49,7 +55,24 @@ public class ReservationService implements IReservationService {
                 .confirmationStatus("PENDING")
                 .build();
 
-        return mapToDTO(reservationRepository.save(reservation));
+        Reservation savedReservation = reservationRepository.save(reservation);
+        ReservationResponseDTO responseDTO = mapToDTO(savedReservation);
+
+        // Enviar correo de confirmación
+        emailService.sendConfirmationEmail(
+            user.getEmail(),
+            savedReservation.getReservationId(),
+            user.getName() + " " + user.getPaternalSurname(),
+            tourPackage.getTitle(),
+            savedReservation.getNumberOfAdults(),
+            savedReservation.getNumberOfChildren(),
+            savedReservation.getNumberOfInfants(),
+            savedReservation.getTotalAmount(),
+            tourPackage.getStart_date(),
+            tourPackage.getEnd_date()
+        );
+
+        return responseDTO;
     }
 
     private double calculateTotalAmount(double basePrice, ReservationRequestDTO requestDTO) {
@@ -122,12 +145,15 @@ public class ReservationService implements IReservationService {
     @Override
     @Transactional(readOnly = true)
     public List<ReservationResponseDTO> getReservationsByUserId(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new ResourceNotFoundException("Usuario no encontrado con ID: " + userId);
-        }
-        return reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getUser().getUserId().equals(userId))
-                .map(this::mapToDTO)
+        List<Reservation> reservations = reservationRepository.findByUserId(userId);
+        return reservations.stream()
+                .map(reservation -> {
+                    System.out.println("Mapping reservation: " + reservation.getReservationId());
+                    System.out.println("Tour package dates: " + 
+                        "Start: " + reservation.getTourPackage().getStart_date() + 
+                        ", End: " + reservation.getTourPackage().getEnd_date());
+                    return mapToDTO(reservation);
+                })
                 .collect(Collectors.toList());
     }
 
@@ -151,21 +177,40 @@ public class ReservationService implements IReservationService {
         return mapToDTO(reservationRepository.save(reservation));
     }
 
+    @Override
+    @Transactional
+    public ReservationResponseDTO confirmReservationByEmail(Long id, String token) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservación no encontrada con ID: " + id));
+
+        // Aquí podrías validar el token si lo necesitas
+        
+        reservation.setConfirmationStatus("CONFIRMED");
+        Reservation savedReservation = reservationRepository.save(reservation);
+        
+        return mapToDTO(savedReservation);
+    }
+
     private ReservationResponseDTO mapToDTO(Reservation reservation) {
+        TourPackage tourPackage = reservation.getTourPackage();
+        System.out.println("Mapping dates for reservation " + reservation.getReservationId() + 
+                          ": Start=" + tourPackage.getStart_date() + 
+                          ", End=" + tourPackage.getEnd_date());
+                          
         return ReservationResponseDTO.builder()
                 .reservationId(reservation.getReservationId())
                 .userId(reservation.getUser().getUserId())
                 .userName(reservation.getUser().getName() + " " + reservation.getUser().getPaternalSurname())
-                .packageId(reservation.getTourPackage().getPackageId())
-                .packageTitle(reservation.getTourPackage().getTitle())
+                .packageId(tourPackage.getPackageId())
+                .packageTitle(tourPackage.getTitle())
                 .numberOfAdults(reservation.getNumberOfAdults())
                 .numberOfChildren(reservation.getNumberOfChildren())
                 .numberOfInfants(reservation.getNumberOfInfants())
                 .totalAmount(reservation.getTotalAmount())
                 .confirmationStatus(reservation.getConfirmationStatus())
                 .rating(reservation.getRating())
-                .createdAt(reservation.getCreatedAt())
-                .updatedAt(reservation.getUpdatedAt())
+                .startDate(tourPackage.getStart_date())
+                .endDate(tourPackage.getEnd_date())
                 .build();
     }
 } 

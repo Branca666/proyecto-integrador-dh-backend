@@ -10,9 +10,9 @@ import java.util.List;
 
 @Repository
 public interface IReservationRepository extends JpaRepository<Reservation, Long> {
-    @Query("SELECT r FROM Reservation r WHERE r.user.id = :userId")
+    @Query("SELECT r FROM Reservation r WHERE r.user.userId = :userId")
     List<Reservation> findByUserId(@Param("userId") Long userId);
     
-    @Query("SELECT r FROM Reservation r WHERE r.tourPackage.id = :packageId")
+    @Query("SELECT r FROM Reservation r WHERE r.tourPackage.packageId = :packageId")
     List<Reservation> findByPackageId(@Param("packageId") Long packageId);
 }

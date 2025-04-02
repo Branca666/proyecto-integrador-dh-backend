@@ -16,7 +16,7 @@ import java.util.Locale;
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-    @Value("${resend.api.key}")
+    @Value("${RESEND_API_KEY}")
     private String resendApiKey;
 
     private final String baseUrl = "https://pi-dh-infradeploytest-production.up.railway.app/";

@@ -19,7 +19,7 @@ public class EmailService {
     @Value("${resend.api.key}")
     private String resendApiKey;
 
-    private final String baseUrl = System.getenv("VITE_API_URL") != null ? System.getenv("VITE_API_URL") : "http://localhost:5173";
+    private final String baseUrl = "https://pi-dh-infradeploytest-production.up.railway.app/";
     private final String RESEND_API_URL = "https://api.resend.com/emails";
     private final RestTemplate restTemplate = new RestTemplate();
 

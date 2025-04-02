@@ -9,25 +9,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
-    @Value("${RESEND_API_KEY}")
+    @Value("${resend.api.key}")
     private String resendApiKey;
 
     private final String baseUrl = "https://pi-dh-infradeploytest-production.up.railway.app/";
     private final String RESEND_API_URL = "https://api.resend.com/emails";
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public void sendConfirmationEmail(String userEmail, Long reservationId, String userName, 
-                                    String packageTitle, int adults, int children, 
-                                    int infants, double totalAmount,
-                                    LocalDate startDate, LocalDate endDate) {
+    public boolean sendConfirmationEmail(String userEmail, Long reservationId, String userName,
+                                         String packageTitle, int adults, int children,
+                                         int infants, double totalAmount,
+                                         LocalDate startDate, LocalDate endDate) {
         try {
+            log.info("Iniciando envío de correo de confirmación para reserva #{} a {}", reservationId, userEmail);
+
             String emailHtml = String.format("""
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
                     <div style="text-align: center; padding: 20px;">
@@ -72,16 +76,16 @@ public class EmailService {
                         </div>
                     </div>
                 </div>
-                """, 
-                packageTitle,
-                reservationId,
-                startDate.format(DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", new Locale("es"))),
-                endDate.format(DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", new Locale("es"))),
-                adults,
-                children,
-                infants,
-                totalAmount,
-                baseUrl
+                """,
+                    packageTitle,
+                    reservationId,
+                    startDate.format(DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", new Locale("es"))),
+                    endDate.format(DateTimeFormatter.ofPattern("d 'de' MMMM, yyyy", new Locale("es"))),
+                    adults,
+                    children,
+                    infants,
+                    totalAmount,
+                    baseUrl
             );
 
             HttpHeaders headers = new HttpHeaders();
@@ -89,28 +93,32 @@ public class EmailService {
             headers.setBearerAuth(resendApiKey);
 
             var emailRequest = new EmailRequest(
-                "GlobeOnClick <onboarding@resend.dev>",
-                userEmail,
-                "¡Gracias por tu reserva, Globe On!",
-                emailHtml
+                    "GlobeOnClick <onboarding@resend.dev>",
+                    userEmail,
+                    "¡Gracias por tu reserva, Globe On!",
+                    emailHtml
             );
 
             HttpEntity<EmailRequest> request = new HttpEntity<>(emailRequest, headers);
             var response = restTemplate.postForEntity(RESEND_API_URL, request, String.class);
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                System.out.println("Email sent successfully to: " + userEmail);
+                log.info("Correo enviado exitosamente a: {}", userEmail);
+                return true;
+            } else {
+                log.error("Error al enviar correo. Código de estado: {}", response.getStatusCode());
+                return false;
             }
         } catch (Exception e) {
-            System.err.println("Error sending email: " + e.getMessage());
-            e.printStackTrace();
+            log.error("Error al enviar correo de confirmación: {}", e.getMessage(), e);
+            return false;
         }
     }
 
     private record EmailRequest(
-        String from,
-        String to,
-        String subject,
-        String html
+            String from,
+            String to,
+            String subject,
+            String html
     ) {}
 }

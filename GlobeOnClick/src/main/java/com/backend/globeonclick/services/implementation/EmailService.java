@@ -81,7 +81,7 @@ public class EmailService {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("GlobeOnClick <globeonclick2025@gmail.com>");
+            helper.setFrom("GlobeOnClick <onboarding@resend.dev>");
             helper.setTo(userEmail);
             helper.setSubject("¡Gracias por tu reserva, Globe On!");
             helper.setText(emailHtml, true);

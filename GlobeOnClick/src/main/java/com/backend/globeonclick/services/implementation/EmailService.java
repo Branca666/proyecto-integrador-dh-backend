@@ -15,7 +15,7 @@ import jakarta.mail.internet.MimeMessage;
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender mailSender;
-    private final String baseUrl = "http://localhost:5173";
+    private final String baseUrl = "https://pi-dh-infradeploytest-production.up.railway.app";
 
     public void sendConfirmationEmail(String userEmail, Long reservationId, String userName,
                                       String packageTitle, int adults, int children,

@@ -175,7 +175,11 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-
+        <dependency>
+            <groupId>io.mailtrap</groupId>
+            <artifactId>mailtrap-java-sdk</artifactId>
+            <version>0.3.0</version>
+        </dependency>
 
     </dependencies>
 

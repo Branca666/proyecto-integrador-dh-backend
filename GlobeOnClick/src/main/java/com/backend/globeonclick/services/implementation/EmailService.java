@@ -1,18 +1,19 @@
 package com.backend.globeonclick.services.implementation;
 
-import io.mailtrap.client.MailtrapClient;
-import io.mailtrap.config.MailtrapConfig;
-import io.mailtrap.factory.MailtrapClientFactory;
-import io.mailtrap.model.request.emails.Address;
-import io.mailtrap.model.request.emails.MailtrapMail;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -22,8 +23,9 @@ public class EmailService {
     @Value("${mailtrap.api.token}")
     private String mailtrapApiToken;
 
+    private final String MAILTRAP_API_URL = "https://send.api.mailtrap.io/api/send";
+    private final RestTemplate restTemplate = new RestTemplate();
     private final String baseUrl = "https://pi-dh-infradeploytest-production.up.railway.app";
-    private MailtrapClient mailtrapClient;
 
     public boolean sendConfirmationEmail(String userEmail, Long reservationId, String userName,
                                          String packageTitle, int adults, int children,
@@ -37,28 +39,34 @@ public class EmailService {
                 return false;
             }
 
-            initializeMailtrapClient();
-
             String emailHtml = buildEmailHtml(reservationId, userName, packageTitle,
                     adults, children, infants,
                     totalAmount, startDate, endDate);
 
-            MailtrapMail mail = MailtrapMail.builder()
-                    .from(new Address("noreply@demomailtrap.co", "GlobeOnClick"))
-                    .to(List.of(new Address(userEmail)))
-                    .subject("¡Gracias por tu reserva en Globe On Click!")
-                    .html(emailHtml)
-                    .category("Reserva Confirmación")
-                    .build();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(mailtrapApiToken);
 
-            var response = mailtrapClient.send(mail);
-            log.debug("Respuesta de Mailtrap: {}", response);
+            var requestBody = Map.of(
+                    "from", Map.of("email", "mailtrap@demomailtrap.com", "name", "GlobeOnClick"),
+                    "to", List.of(Map.of("email", userEmail)),
+                    "subject", "¡Gracias por tu reserva en Globe On Click!",
+                    "html", emailHtml,
+                    "category", "Reserva Confirmación"
+            );
 
-            if (response.isSuccess()) {
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            var response = restTemplate.postForEntity(MAILTRAP_API_URL, request, Map.class);
+
+            log.debug("Respuesta de Mailtrap: {}", response.getBody());
+
+            if (response.getStatusCode().is2xxSuccessful()) {
                 log.info("Correo enviado exitosamente a {}", userEmail);
                 return true;
             } else {
-                log.error("Error al enviar correo. Respuesta: {}", response.getErrors());
+                log.error("Error al enviar correo. Status: {}, Respuesta: {}",
+                        response.getStatusCode(), response.getBody());
                 return false;
             }
         } catch (Exception e) {
@@ -67,21 +75,12 @@ public class EmailService {
         }
     }
 
-    private void initializeMailtrapClient() {
-        if (mailtrapClient == null) {
-            MailtrapConfig config = new MailtrapConfig.Builder()
-                    .token(mailtrapApiToken)
-                    .build();
-            mailtrapClient = MailtrapClientFactory.createMailtrapClient(config);
-        }
-    }
-
     private String buildEmailHtml(Long reservationId, String userName, String packageTitle,
                                   int adults, int children, int infants,
                                   double totalAmount, LocalDate startDate, LocalDate endDate) {
         // Mantener el mismo método de construcción de HTML que tenías antes
         return String.format("""
-            [Tu HTML existente aquí...]
+            [Tu HTML existente...]
             """,
                 userName,
                 packageTitle,

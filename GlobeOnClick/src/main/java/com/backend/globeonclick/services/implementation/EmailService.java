@@ -52,7 +52,7 @@ public class EmailService {
             headers.set("Authorization", "Bearer " + resendApiKey);
 
             var emailRequest = new EmailRequest(
-                    "GlobeOnClick <onboarding@resend.dev>", // Cambiar por dominio verificado en producción
+                    "globeonclick2025@gmail.com", // Cambiar por dominio verificado en producción
                     userEmail,
                     "¡Gracias por tu reserva en Globe On Click!",
                     emailHtml

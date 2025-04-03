@@ -21,7 +21,7 @@ public class EmailService {
     @Value("${mailtrap.api.token}")
     private String mailtrapApiToken;
 
-    private final String baseUrl = "http://pi-dh-infradeploytest-production.up.railway.app";
+    private final String baseUrl = "https://pi-dh-infradeploytest-production.up.railway.app";
     private final String MAILTRAP_API_URL = "https://send.api.mailtrap.io/api/send";
     private final RestTemplate restTemplate = new RestTemplate();
 

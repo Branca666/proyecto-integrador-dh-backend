@@ -88,7 +88,7 @@ public class EmailService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(mailtrapApiToken);
+            headers.set("Api-Token", mailtrapApiToken);
 
             Map<String, Object> from = new HashMap<>();
             from.put("email", "globeonclick2025@gmail.com");
